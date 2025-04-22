@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Video Comparison Tool (MVP)</title>
+    <title>Video Comparison Tool</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         /* Custom styles if needed */
@@ -26,7 +26,7 @@
 <body class="bg-gray-100 min-h-screen flex items-center justify-center p-4">
 
     <div class="bg-white p-8 rounded-lg shadow-md w-full max-w-2xl">
-        <h1 class="text-2xl font-bold mb-6 text-center text-gray-700">Video Comparison (Side-by-Side MVP)</h1>
+        <h1 class="text-2xl font-bold mb-6 text-center text-gray-700">Video Comparison Tool</h1>
 
         <form id="uploadForm" class="space-y-6">
             <div>
@@ -53,6 +53,18 @@
                               cursor-pointer border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500">
             </div>
 
+            <div>
+                <label for="comparisonMethod" class="block text-sm font-medium text-gray-700 mb-1">Comparison Method:</label>
+                <select id="comparisonMethod" name="comparison_method" required
+                        class="block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                    <option value="side_by_side" selected>Side-by-Side</option>
+                    <option value="difference_blend">Difference Blend</option>
+                    <option value="opacity_blend">Opacity Blend (50%)</option>
+                    <option value="interleave">Interleave (Blinking)</option>
+                    </select>
+            </div>
+
+
             <button type="submit" id="submitBtn"
                     class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-150 ease-in-out">
                 Generate Comparison
@@ -77,6 +89,7 @@
         const form = document.getElementById('uploadForm');
         const video1Input = document.getElementById('video1');
         const video2Input = document.getElementById('video2');
+        const methodSelect = document.getElementById('comparisonMethod'); // Get the select element
         const submitBtn = document.getElementById('submitBtn');
         const statusDiv = document.getElementById('status');
         const resultDiv = document.getElementById('result');
@@ -90,13 +103,19 @@
         form.addEventListener('submit', async (event) => {
             event.preventDefault(); // Prevent default form submission
 
-            // Get selected files
+            // Get selected files and method
             const file1 = video1Input.files[0];
             const file2 = video2Input.files[0];
+            const selectedMethod = methodSelect.value; // Get the selected method value
 
             // Basic validation
             if (!file1 || !file2) {
                 statusDiv.textContent = 'Please select both video files.';
+                statusDiv.className = 'mt-6 text-center text-sm font-medium text-red-600 h-5'; // Error color
+                return;
+            }
+             if (!selectedMethod) {
+                statusDiv.textContent = 'Please select a comparison method.';
                 statusDiv.className = 'mt-6 text-center text-sm font-medium text-red-600 h-5'; // Error color
                 return;
             }
@@ -110,10 +129,11 @@
             outputVideo.src = ''; // Clear previous video source
             downloadLink.href = '#'; // Clear previous download link
 
-            // Create FormData to send files
+            // Create FormData to send files and method
             const formData = new FormData();
             formData.append('video1', file1);
             formData.append('video2', file2);
+            formData.append('comparison_method', selectedMethod); // Add selected method to form data
 
             try {
                 // Show processing status
@@ -124,8 +144,6 @@
                 const response = await fetch(apiUrl, {
                     method: 'POST',
                     body: formData,
-                    // Headers are not explicitly needed for FormData with fetch,
-                    // the browser sets Content-Type to multipart/form-data correctly
                 });
 
                 // Stop pulsing animation
@@ -133,14 +151,11 @@
 
                 // Check if the request was successful
                 if (!response.ok) {
-                    // Try to get error message from backend response body
                     let errorMsg = `Error: ${response.status} ${response.statusText}`;
                     try {
                         const errorData = await response.json();
                         errorMsg = errorData.error || errorMsg;
-                    } catch (e) {
-                        // Ignore if response body is not JSON
-                    }
+                    } catch (e) { /* Ignore if response body is not JSON */ }
                     throw new Error(errorMsg);
                 }
 
@@ -153,10 +168,10 @@
                     statusDiv.className = 'mt-6 text-center text-sm font-medium text-green-600 h-5'; // Success color
                     outputVideo.src = data.output_url; // Set video source
                     downloadLink.href = data.output_url; // Set download link
+                    downloadLink.download = data.output_filename || 'comparison_video.mp4'; // Set download filename
                     resultDiv.classList.remove('hidden'); // Show result section
                     outputVideo.load(); // Load the new video metadata
                 } else {
-                    // Handle cases where backend might not return URL even with 200 OK
                     throw new Error(data.error || 'Processing failed on the server.');
                 }
 
