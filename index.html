@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Comparison Tool (MVP)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles if needed */
+        body {
+            font-family: 'Inter', sans-serif; /* Using Inter font as preferred */
+        }
+        /* Add a subtle animation for the processing status */
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .processing-pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+    </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center p-4">
+
+    <div class="bg-white p-8 rounded-lg shadow-md w-full max-w-2xl">
+        <h1 class="text-2xl font-bold mb-6 text-center text-gray-700">Video Comparison (Side-by-Side MVP)</h1>
+
+        <form id="uploadForm" class="space-y-6">
+            <div>
+                <label for="video1" class="block text-sm font-medium text-gray-700 mb-1">Video 1:</label>
+                <input type="file" id="video1" name="video1" accept="video/*" required
+                       class="block w-full text-sm text-gray-500
+                              file:mr-4 file:py-2 file:px-4
+                              file:rounded-md file:border-0
+                              file:text-sm file:font-semibold
+                              file:bg-blue-50 file:text-blue-700
+                              hover:file:bg-blue-100
+                              cursor-pointer border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+            </div>
+
+            <div>
+                <label for="video2" class="block text-sm font-medium text-gray-700 mb-1">Video 2:</label>
+                <input type="file" id="video2" name="video2" accept="video/*" required
+                       class="block w-full text-sm text-gray-500
+                              file:mr-4 file:py-2 file:px-4
+                              file:rounded-md file:border-0
+                              file:text-sm file:font-semibold
+                              file:bg-green-50 file:text-green-700
+                              hover:file:bg-green-100
+                              cursor-pointer border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500">
+            </div>
+
+            <button type="submit" id="submitBtn"
+                    class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-150 ease-in-out">
+                Generate Comparison
+            </button>
+        </form>
+
+        <div id="status" class="mt-6 text-center text-sm font-medium text-gray-600 h-5">
+            </div>
+
+        <div id="result" class="mt-6 hidden"> <h2 class="text-lg font-semibold mb-2 text-gray-700">Comparison Result:</h2>
+            <div class="bg-gray-200 rounded-md overflow-hidden">
+                <video id="outputVideo" controls class="w-full h-auto" preload="metadata">
+                    Your browser does not support the video tag.
+                </video>
+            </div>
+             <a id="downloadLink" href="#" download="comparison_video.mp4" class="mt-4 inline-block text-sm text-indigo-600 hover:text-indigo-800">Download Video</a>
+        </div>
+    </div>
+
+    <script>
+        // Get references to DOM elements
+        const form = document.getElementById('uploadForm');
+        const video1Input = document.getElementById('video1');
+        const video2Input = document.getElementById('video2');
+        const submitBtn = document.getElementById('submitBtn');
+        const statusDiv = document.getElementById('status');
+        const resultDiv = document.getElementById('result');
+        const outputVideo = document.getElementById('outputVideo');
+        const downloadLink = document.getElementById('downloadLink');
+
+        // Backend API endpoint URL (adjust if your backend runs elsewhere)
+        const apiUrl = '/compare'; // Assumes backend runs on the same origin
+
+        // Handle form submission
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault(); // Prevent default form submission
+
+            // Get selected files
+            const file1 = video1Input.files[0];
+            const file2 = video2Input.files[0];
+
+            // Basic validation
+            if (!file1 || !file2) {
+                statusDiv.textContent = 'Please select both video files.';
+                statusDiv.className = 'mt-6 text-center text-sm font-medium text-red-600 h-5'; // Error color
+                return;
+            }
+
+            // Disable button and show uploading status
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Uploading...';
+            statusDiv.textContent = 'Uploading videos...';
+            statusDiv.className = 'mt-6 text-center text-sm font-medium text-gray-600 h-5'; // Reset color
+            resultDiv.classList.add('hidden'); // Hide previous result
+            outputVideo.src = ''; // Clear previous video source
+            downloadLink.href = '#'; // Clear previous download link
+
+            // Create FormData to send files
+            const formData = new FormData();
+            formData.append('video1', file1);
+            formData.append('video2', file2);
+
+            try {
+                // Show processing status
+                statusDiv.textContent = 'Processing... This may take a while.';
+                statusDiv.classList.add('processing-pulse'); // Add pulsing animation
+
+                // Send request to backend API
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    body: formData,
+                    // Headers are not explicitly needed for FormData with fetch,
+                    // the browser sets Content-Type to multipart/form-data correctly
+                });
+
+                // Stop pulsing animation
+                statusDiv.classList.remove('processing-pulse');
+
+                // Check if the request was successful
+                if (!response.ok) {
+                    // Try to get error message from backend response body
+                    let errorMsg = `Error: ${response.status} ${response.statusText}`;
+                    try {
+                        const errorData = await response.json();
+                        errorMsg = errorData.error || errorMsg;
+                    } catch (e) {
+                        // Ignore if response body is not JSON
+                    }
+                    throw new Error(errorMsg);
+                }
+
+                // Get the JSON response
+                const data = await response.json();
+
+                // Check if the backend reported success and provided a URL
+                if (data.output_url) {
+                    statusDiv.textContent = 'Comparison complete!';
+                    statusDiv.className = 'mt-6 text-center text-sm font-medium text-green-600 h-5'; // Success color
+                    outputVideo.src = data.output_url; // Set video source
+                    downloadLink.href = data.output_url; // Set download link
+                    resultDiv.classList.remove('hidden'); // Show result section
+                    outputVideo.load(); // Load the new video metadata
+                } else {
+                    // Handle cases where backend might not return URL even with 200 OK
+                    throw new Error(data.error || 'Processing failed on the server.');
+                }
+
+            } catch (error) {
+                console.error('Upload/Processing Error:', error);
+                statusDiv.textContent = `Failed: ${error.message}`;
+                statusDiv.className = 'mt-6 text-center text-sm font-medium text-red-600 h-5'; // Error color
+            } finally {
+                // Re-enable button regardless of success or failure
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Generate Comparison';
+            }
+        });
+    </script>
+
+</body>
+</html>
