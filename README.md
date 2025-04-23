@@ -1,69 +1,179 @@
-# Video Comparison Tool (MVP)
-A simple web application to compare two videos side-by-side using FFMPEG. This is the Minimum Viable Product (MVP) version.
-## Description
-This tool allows users to upload two video files through a web interface. The backend, built with Flask, processes these videos using FFMPEG to create a single output video showing the two inputs stacked horizontally (side-by-side). The resulting comparison video is then displayed back to the user in the browser.
+Video Comparison Tool
+=====================
+
+A web application to compare two videos using various FFMPEG-based methods.
+
+Description
+-----------
+
+This tool allows users to upload two video files (MP4, MOV, AVI, MKV, WebM) through a web interface. The backend, built with Flask, processes these videos using FFMPEG to create a single output video comparing the two inputs based on a selected method. The resulting comparison video is then displayed back to the user in the browser at a selectable playback speed.
+
 This is particularly useful for visualizing differences between versions of animations or simulations, such as comparing outputs from different iterations of an IK/physics model applied to motion capture data.
-## Prerequisites
+
+Features
+--------
+
+-   **Multiple Comparison Methods:**
+
+    -   Side-by-Side (Horizontal Stack)
+
+    -   Vertical Stack
+
+    -   Difference Blend (with brightness boost & subtle input tinting)
+
+    -   Subtract Blend (with brightness boost & subtle input tinting)
+
+    -   Opacity Blend (50% Average Blend, with subtle input tinting)
+
+    -   Interleave (Blinking effect using frame overlay)
+
+    -   Color Channel Mix (R from Video 1, G averaged, B from Video 2)
+
+-   **Playback Speed Control:** Output video can be generated at Normal (1x), Half (0.5x - Default), or Quarter (0.25x) speed.
+
+-   **File Upload:** Supports MP4, MOV, AVI, MKV, and WebM formats.
+
+-   **Quick Test Feature:** Allows testing with pre-named local files (`uploads/old.mp4` and `uploads/new.mp4`) without manual uploads.
+
+-   **Web Interface:** Simple UI for uploading files, selecting options, and viewing results.
+
+-   **Backend Processing:** Uses Python (Flask) and FFMPEG.
+
+-   **Temporary File Cleanup:** Automatically removes uploaded files after processing.
+
+Prerequisites
+-------------
+
 Before running the application, ensure you have the following installed:
-1. Python 3: Download from python.org
-2. Flask: Python web framework. Install via pip:
-```pip install Flask```
 
-3. FFMPEG: A complete, cross-platform solution to record, convert and stream audio and video. Download from ffmpeg.org.
-- Important: Ensure the ffmpeg command is accessible from your system's command line (i.e., it's in your system's PATH environment variable). You can test this by typing ffmpeg -version in your terminal or command prompt.
-## Installation
-Clone or download this repository/code.
-Navigate to the project directory in your terminal.
-Install the required Python package:
-pip install Flask
+1.  **Python 3:** Download from [python.org](https://www.python.org/downloads/ "null")
 
+2.  **Flask:** Python web framework. Install via pip:
 
-## Running the Application
-Ensure all prerequisites are met (Python, Flask installed, FFMPEG installed and in PATH).
-Navigate to the project directory containing app.py and index.html.
-Run the Flask development server:
-python app.py
+    ```
+    pip install Flask
 
+    ```
 
-The application will start, and you should see output similar to:
- * Running on http://127.0.0.1:5000
- * Running on http://<your-local-ip>:5000
+3.  **FFMPEG:** A complete, cross-platform solution to record, convert and stream audio and video. Download from [ffmpeg.org](https://ffmpeg.org/download.html "null").
 
+    -   **Important:** Ensure the `ffmpeg` command is accessible from your system's command line (i.e., it's in your system's PATH environment variable). You can test this by typing `ffmpeg -version` in your terminal or command prompt.
 
-Open your web browser and go to http://127.0.0.1:5000 or http://localhost:5000.
+Installation
+------------
 
-## How to Use
-1. Access the web application in your browser.
-2. Click the "Choose File" button for "Video 1" and select your first 3. video file.
-3. Click the "Choose File" button for "Video 2" and select your second video file.
-4. Click the "Generate Comparison" button.
-5. Wait for the processing to complete. Status messages ("Uploading...", "Processing...") will be displayed.
-6. Once finished, the side-by-side comparison video will appear in the player below, and a download link will be available.
+1.  Clone this repository:
 
-## File Structure
+    ```
+    git clone <your-repo-url>
+    cd <repository-directory>
+
+    ```
+
+2.  (Optional, Recommended) Create and activate a virtual environment:
+
+    ```
+    python3 -m venv venv
+    source venv/bin/activate  # On Windows use `venv\Scripts\activate`
+
+    ```
+
+3.  Install the required Python package:
+
+    ```
+    pip install Flask
+
+    ```
+
+Running the Application
+-----------------------
+
+1.  Ensure all prerequisites are met (Python, Flask installed, FFMPEG installed and in PATH).
+
+2.  Navigate to the project directory containing `app.py` and `index.html`.
+
+3.  **(Optional Quick Test Setup):** If you want to use the "Quick Test" button, place two video files named exactly `old.mp4` and `new.mp4` inside the `uploads/` directory (you may need to create this directory first if it doesn't exist).
+
+4.  Run the Flask development server:
+
+    ```
+    python app.py
+
+    ```
+
+5.  The application will start, and you should see output similar to:
+
+    ```
+     * Running on http://127.0.0.1:5000
+     * Running on http://<your-local-ip>:5000
+
+    ```
+
+6.  Open your web browser and go to `http://127.0.0.1:5000` or `http://localhost:5000`.
+
+How to Use
+----------
+
+1.  Access the web application in your browser.
+
+2.  **Option A: Upload Files**
+
+    -   Click "Choose File" for "Video 1" and select your first video file (mp4, mov, avi, mkv, webm).
+
+    -   Click "Choose File" for "Video 2" and select your second video file.
+
+    -   Select the desired "Comparison Method" from the dropdown.
+
+    -   Select the desired "Playback Speed" from the dropdown (defaults to Half Speed).
+
+    -   Click the "Generate Comparison from Uploads" button.
+
+3.  **Option B: Quick Test (Requires Setup)**
+
+    -   Ensure `uploads/old.mp4` and `uploads/new.mp4` exist on the server (see Running the Application, step 3).
+
+    -   Select the desired "Comparison Method" from the dropdown.
+
+    -   Select the desired "Playback Speed" from the dropdown (defaults to Half Speed).
+
+    -   Click the "Quick Test with Samples (old.mp4 / new.mp4)" button.
+
+4.  Wait for the processing to complete. Status messages ("Uploading...", "Processing...") will be displayed.
+
+5.  Once finished, the comparison video will appear in the player below, and a download link will be available.
+
+File Structure
+--------------
+
 ```
 .
 ├── app.py           # Flask backend logic
 ├── index.html       # Frontend HTML, CSS (Tailwind via CDN), and JavaScript
-├── uploads/         # Temporary directory for uploaded videos (created automatically)
+├── uploads/         # Directory for uploaded videos & quick test samples (created automatically)
 ├── outputs/         # Directory for generated comparison videos (created automatically)
 └── README.md        # This file
+
 ```
 
-## Current Features (MVP)
-- Upload two video files via web UI.
-- Backend processing using FFMPEG.
-- Generates a side-by-side (horizontal stack) comparison video.
-- Displays the resulting video in the browser.
-- Provides a download link for the result.
-- Basic status updates and error handling.
-- Cleans up temporary uploaded files.
-## Future Work / Potential Enhancements
-- Add more comparison methods (Opacity Blend, Difference Blend, Heatmaps).
-- Improve progress reporting for long processing times (e.g., using WebSockets or polling).
-- Optimize for large file uploads (chunking).
-- Implement asynchronous task queues (e.g., Celery) for better scalability and non-blocking processing.
-- Add user authentication and job history.
-- Improve error handling and user feedback.
-- Allow customization of FFMPEG parameters (resolution, quality).
-- Containerize the application using Docker.
+Future Work / Potential Enhancements
+------------------------------------
+
+-   Implement more advanced comparison methods (e.g., Heatmaps using OpenCV).
+
+-   Add interactive controls (e.g., slider for opacity blend).
+
+-   Improve progress reporting for long processing times (e.g., using WebSockets or polling).
+
+-   Optimize for very large file uploads (chunking, direct-to-storage).
+
+-   Implement asynchronous task queues (e.g., Celery) for better scalability and non-blocking processing.
+
+-   Add user authentication and job history/management.
+
+-   Improve error handling and user feedback granularity.
+
+-   Allow customization of FFMPEG parameters (resolution, quality, tinting amount, boost amount).
+
+-   Containerize the application using Docker for easier deployment.
+
+-   Add unit and integration tests.
