@@ -88,6 +88,33 @@ Installation
 Running the Application
 -----------------------
 
+### Option 1: Using the Setup Script (Recommended)
+
+1.  Make the setup script executable:
+
+    ```
+    chmod +x setup_and_run.sh
+    ```
+
+2.  Run the setup script:
+
+    ```
+    ./setup_and_run.sh
+    ```
+
+    This script will automatically:
+    - Check for FFMPEG installation
+    - Set up a Python virtual environment
+    - Install required packages
+    - Create necessary directories
+    - Start the Flask application
+    - Open your web browser to the application
+    - Handle cleanup when you're done (press Ctrl+C to exit)
+
+3.  **(Optional Quick Test Setup):** If you want to use the "Quick Test" button, place two video files named exactly `old.mp4` and `new.mp4` inside the `uploads/` directory before running the script.
+
+### Option 2: Manual Setup
+
 1.  Ensure all prerequisites are met (Python, Flask installed, FFMPEG installed and in PATH).
 
 2.  Navigate to the project directory containing `app.py` and `index.html`.
@@ -98,7 +125,6 @@ Running the Application
 
     ```
     python app.py
-
     ```
 
 5.  The application will start, and you should see output similar to:
@@ -106,7 +132,6 @@ Running the Application
     ```
      * Running on http://127.0.0.1:5000
      * Running on http://<your-local-ip>:5000
-
     ```
 
 6.  Open your web browser and go to `http://127.0.0.1:5000` or `http://localhost:5000`.
@@ -149,10 +174,10 @@ File Structure
 .
 ├── app.py           # Flask backend logic
 ├── index.html       # Frontend HTML, CSS (Tailwind via CDN), and JavaScript
+├── setup_and_run.sh # Automated setup and run script
 ├── uploads/         # Directory for uploaded videos & quick test samples (created automatically)
 ├── outputs/         # Directory for generated comparison videos (created automatically)
 └── README.md        # This file
-
 ```
 
 Future Work / Potential Enhancements
