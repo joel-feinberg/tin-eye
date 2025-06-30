@@ -6,10 +6,7 @@ from flask import Flask, request, jsonify, send_from_directory
 import math # For ceiling function
 
 # Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
+logging.basicConfig(level=logging.INFO)
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -286,23 +283,6 @@ def serve_output_video(filename):
         return jsonify({"error": "File not found"}), 404
 
 
-@app.route('/health')
-def health_check():
-    """Health check endpoint for Google Cloud Run."""
-    try:
-        # Quick check that FFMPEG is available
-        result = subprocess.run(['ffmpeg', '-version'], 
-                              capture_output=True, 
-                              text=True, 
-                              timeout=5)
-        if result.returncode == 0:
-            return jsonify({"status": "healthy", "ffmpeg": "available"}), 200
-        else:
-            return jsonify({"status": "unhealthy", "error": "ffmpeg not available"}), 500
-    except Exception as e:
-        return jsonify({"status": "unhealthy", "error": str(e)}), 500
-
-
 @app.route('/')
 def index():
     """Serves the main HTML page."""
@@ -317,13 +297,8 @@ def index():
 # --- Main Execution ---
 if __name__ == '__main__':
     create_directories()
-    
     # Check for quick test files on startup
     if not os.path.exists(QUICK_TEST_FILE_1) or not os.path.exists(QUICK_TEST_FILE_2):
          logging.warning(f"Quick test sample files not found: {QUICK_TEST_FILE_1}, {QUICK_TEST_FILE_2}. The 'Quick Test' button will result in an error.")
 
-    # Production configuration for Cloud Run
-    port = int(os.environ.get('PORT', 8080))
-    debug_mode = os.environ.get('FLASK_ENV') == 'development'
-    
-    app.run(host='0.0.0.0', port=port, debug=debug_mode)
+    app.run(host='0.0.0.0', port=5000, debug=True) # Debug=False in production!

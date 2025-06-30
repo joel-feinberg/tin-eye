@@ -1,0 +1,43 @@
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Virtual environments
+venv/
+.venv/
+env/
+.env
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+
+# Project specific
+.app_pid
+app_backup.py
+app_production_changes.py
+van_analysis_output.md
+tasks.md
+projectbrief.md
+activeContext.md
+progress.md
+
+# Documentation
+README.md
+setup_and_run.sh
+
+# Logs
+*.log

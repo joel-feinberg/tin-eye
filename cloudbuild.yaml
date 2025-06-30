@@ -1,0 +1,41 @@
+# Google Cloud Build configuration for Video Comparison Tool
+steps:
+  # Build the container image
+  - name: 'gcr.io/cloud-builders/docker'
+    args: [
+      'build',
+      '-t', 'gcr.io/$PROJECT_ID/video-comparison-tool:$COMMIT_SHA',
+      '-t', 'gcr.io/$PROJECT_ID/video-comparison-tool:latest',
+      '.'
+    ]
+
+  # Push the container image to Container Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'gcr.io/$PROJECT_ID/video-comparison-tool:$COMMIT_SHA']
+
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'gcr.io/$PROJECT_ID/video-comparison-tool:latest']
+
+  # Deploy to Cloud Run
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args: [
+      'run', 'deploy', 'video-comparison-tool',
+      '--image', 'gcr.io/$PROJECT_ID/video-comparison-tool:$COMMIT_SHA',
+      '--region', 'us-central1',
+      '--platform', 'managed',
+      '--memory', '1Gi',
+      '--cpu', '1',
+      '--timeout', '900',
+      '--concurrency', '10',
+      '--max-instances', '3',
+      '--allow-unauthenticated'
+    ]
+
+# Store images in Google Container Registry
+images:
+  - 'gcr.io/$PROJECT_ID/video-comparison-tool:$COMMIT_SHA'
+  - 'gcr.io/$PROJECT_ID/video-comparison-tool:latest'
+
+# Configure build timeout (video processing may take time)
+timeout: 1200s
